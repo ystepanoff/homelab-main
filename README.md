@@ -3,7 +3,7 @@ Homelab Stack
 Docker-Compose collection that runs a small self-hosted stack over Tailscale with TLS termination handled by Traefik.
 
 | Service | Purpose | URL (default)
------------------------------------
+|----------------------------------|
 | Tailscale	| Tailnet connectivity | —
 | Traefik | Reverse-proxy, ACME (dns-01 via Cloudflare)	| https://traefik.<DOMAIN>
 | PostgreSQL 16	| shared database | —
