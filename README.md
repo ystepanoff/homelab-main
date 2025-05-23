@@ -4,13 +4,13 @@ Docker-Compose collection that runs a small self-hosted stack over Tailscale wit
 
 | Service | Purpose | URL (default) |
 | ---------------------------------- |
-| Tailscale	| Tailnet connectivity | —
-| Traefik | Reverse-proxy, ACME (dns-01 via Cloudflare)	| https://traefik.<DOMAIN>
-| PostgreSQL 16	| shared database | —
-| Speedtest-Tracker | scheduled bandwidth tests | https://speed.<DOMAIN>
-| Gitea	| lightweight Git server | https://git.<DOMAIN>
-| Actual-Budget | personal finance app | https://actual.<DOMAIN>
-| Watchtower | optional auto-updates | —
+| Tailscale	| Tailnet connectivity | — | 
+| Traefik | Reverse-proxy, ACME (dns-01 via Cloudflare)	| https://traefik.<DOMAIN> |
+| PostgreSQL 16	| shared database | — |
+| Speedtest-Tracker | scheduled bandwidth tests | https://speed.<DOMAIN> | 
+| Gitea	| lightweight Git server | https://git.<DOMAIN> | 
+| Actual-Budget | personal finance app | https://actual.<DOMAIN> | 
+| Watchtower | optional auto-updates | — | 
 
 ⸻
 
