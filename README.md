@@ -15,10 +15,11 @@ Docker-Compose collection that runs a small self-hosted stack over Tailscale wit
 ⸻
 
 Prerequisites
-	-	Docker Engine + Compose plugin (or Docker Desktop)¹
-	-	Domain managed in Cloudflare (DNS API token with Zone - DNS:Edit)
-	-	Tailscale account & auth key (TS_AUTHKEY)
-	-	Server (Raspberry Pi) running a native Linux filesystem (ext4 / xfs / btrfs)
+
+- Docker Engine + Compose plugin (or Docker Desktop)¹
+- Domain managed in Cloudflare (DNS API token with Zone - DNS:Edit)
+- Tailscale account & auth key (TS_AUTHKEY)
+- Server (Raspberry Pi) running a native Linux filesystem (ext4 / xfs / btrfs)
 
 ⸻
 
