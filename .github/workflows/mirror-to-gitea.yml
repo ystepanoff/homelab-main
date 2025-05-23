@@ -1,0 +1,24 @@
+name: Mirror to self-hosted Gitea
+on:
+  push:
+    branches: [ "*" ]
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Push to Gitea
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          GITEA_HOST: ${{ secrets.GITEA_HOST }}
+          GITEA_USER: ${{ secrets.GITEA_USER }}
+          GITEA_REPO: ${{ secrets.GITEA_REPO }}
+        run: |
+          git remote add gitea https://$GITEA_TOKEN@$GITEA_HOST/$GITEA_USER/$GITEA_REPO.git
+          git push --mirror gitea
