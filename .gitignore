@@ -1,0 +1,6 @@
+actual/
+gitea/
+postgres/
+tailscale/
+traefik/
+.env
