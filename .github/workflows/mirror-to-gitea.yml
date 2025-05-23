@@ -16,9 +16,9 @@ jobs:
       - name: Push to Gitea
         env:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
-          GITEA_HOST: ${{ secrets.GITEA_HOST }}
-          GITEA_USER: ${{ secrets.GITEA_USER }}
-          GITEA_REPO: ${{ secrets.GITEA_REPO }}
+          GITEA_HOST: ${{ vars.GITEA_HOST }}
+          GITEA_USER: ${{ vars.GITEA_USER }}
+          GITEA_REPO: ${{ vars.GITEA_REPO }}
         run: |
           git remote add gitea https://$GITEA_TOKEN@$GITEA_HOST/$GITEA_USER/$GITEA_REPO.git
           git push --mirror gitea
