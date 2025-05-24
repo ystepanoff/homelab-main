@@ -6,4 +6,5 @@ traefik/
 portainer/
 speedtest-tracker/
 watchyourlan/
+duplicati/
 .env
