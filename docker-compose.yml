@@ -63,6 +63,22 @@ services:
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    networks: [ proxy ]
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./portainer:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls.certresolver=letsencrypt"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "com.centurylinklabs.watchtower.enable=true"
+
   postgres:
     image: postgres:16
     container_name: postgres
@@ -93,6 +109,8 @@ services:
       DB_USERNAME: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}
       SPEEDTEST_SCHEDULE: ${SPEEDTEST_SCHEDULE}
+    volumes:
+      - ./speedtest-tracker:/config
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"

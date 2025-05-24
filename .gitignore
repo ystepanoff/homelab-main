@@ -3,4 +3,6 @@ gitea/
 postgres/
 tailscale/
 traefik/
+portainer/
+speedtest-tracker/
 .env
