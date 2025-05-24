@@ -139,6 +139,8 @@ services:
       PG_CONNECT: "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@127.0.0.1:5432/$WYL_DB?sslmode=disable"
     volumes:
       - ./watchyourlan:/data/WatchYourLAN
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
 
   watchyourlan-proxy:
     image: alpine/socat:latest
@@ -159,6 +161,7 @@ services:
       - "traefik.http.routers.watchyourlan.tls.certresolver=letsencrypt"
       - "traefik.http.routers.watchyourlan.service=watchyourlan-proxy@docker"
       - "traefik.http.services.watchyourlan-proxy.loadbalancer.server.port=8841"
+      - "com.centurylinklabs.watchtower.enable=true"
 
   gitea:
     image: gitea/gitea:latest
