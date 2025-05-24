@@ -87,9 +87,10 @@ services:
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${SPEEDTEST_DB}
     volumes:
       - ./postgres:/var/lib/postgresql/data
+    ports:
+    - 5432:5432
 
   speedtest-tracker:
     image: lscr.io/linuxserver/speedtest-tracker:0.20.0
@@ -119,6 +120,45 @@ services:
       - "traefik.http.routers.speed.tls.certresolver=letsencrypt"
       - "traefik.http.services.speed.loadbalancer.server.port=80"
       - "com.centurylinklabs.watchtower.enable=true"
+
+  watchyourlan:
+    image: aceberg/watchyourlan:latest
+    container_name: watchyourlan
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on: [ postgres ]
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+      IFACES: ${WYL_IFACES}
+      LOGLEVEL: DEBUG
+      THEME: vapor
+      USE_DB: postgres
+      PG_CONNECT: "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@127.0.0.1:5432/$WYL_DB?sslmode=disable"
+    volumes:
+      - ./watchyourlan:/data/WatchYourLAN
+
+  watchyourlan-proxy:
+    image: alpine/socat:latest
+    container_name: watchyourlan-proxy
+    command:
+      - TCP-LISTEN:8841,fork,reuseaddr
+      - TCP:host-gateway:8840
+    networks: [ proxy ]
+    extra_hosts:
+      - "host-gateway:host-gateway"
+    restart: unless-stopped
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.watchyourlan.rule=Host(`lan.${DOMAIN}`)"
+      - "traefik.http.routers.watchyourlan.entrypoints=websecure"
+      - "traefik.http.routers.watchyourlan.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.watchyourlan.service=watchyourlan-proxy@docker"
+      - "traefik.http.services.watchyourlan-proxy.loadbalancer.server.port=8841"
 
   gitea:
     image: gitea/gitea:latest
@@ -182,3 +222,4 @@ services:
 networks:
   proxy:
     driver: bridge
+    external: true
