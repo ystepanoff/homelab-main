@@ -151,8 +151,8 @@ services:
     networks: [ proxy ]
     extra_hosts:
       - "host-gateway:host-gateway"
+    depends_on: [ watchyourlan ]
     restart: unless-stopped
-
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -221,6 +221,64 @@ services:
       - WATCHTOWER_LABEL_ENABLE=true
       - WATCHTOWER_POLL_INTERVAL=86400
       - WATCHTOWER_ROLLING_RESTART=true
+
+  duplicati:
+    image: lscr.io/linuxserver/duplicati:latest
+    container_name: duplicati
+    networks: [ proxy ]
+    restart: unless-stopped
+    environment:
+      PUID: 0
+      PGID: 0
+      TZ: ${TZ}
+      SETTINGS_ENCRYPTION_KEY: ${DUPLICATI_ENCRYPTION_KEY}
+      CLI_ARGS: ${DUPLICATI_CLI_ARGS}
+      DUPLICATI__WEBSERVICE_PASSWORD: ${DUPLICATI_WEBSERVICE_PASSWORD}
+      DOTNET_SYSTEM_IO_DISABLEFILELOCKING: true
+    volumes:
+      - ./duplicati/config:/config
+      - ./duplicati/backups:/backups
+      - ~/homelab:/source
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.duplicati.rule=Host(`bkp.${DOMAIN}`)"
+      - "traefik.http.routers.duplicati.entrypoints=websecure"
+      - "traefik.http.routers.duplicati.tls.certresolver=letsencrypt"
+      - "traefik.http.services.duplicati.loadbalancer.server.port=8200"
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+      FTLCONF_webserver_api_password: "${PIHOLE_WEBPASSWORD}"
+      FTLCONF_dns_upstreams: ${PIHOLE_DNS_UPSTREAMS}
+      ServerIP: "$(hostname -I | awk '{print $1}')"
+    volumes:
+      - ./pihole/pihole:/etc/pihole
+      - ./pihole/dnsmasq.d:/etc/dnsmasq.d
+
+  pihole-proxy:
+    image: alpine/socat:latest
+    container_name: pihole-proxy
+    command:
+      - TCP-LISTEN:8860,fork,reuseaddr
+      - TCP:host-gateway:80
+    networks: [ proxy ]
+    extra_hosts:
+      - "host-gateway:host-gateway"
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.pihole.rule=Host(`pihole.${DOMAIN}`)"
+      - "traefik.http.routers.pihole.entrypoints=websecure"
+      - "traefik.http.routers.pihole.tls.certresolver=letsencrypt"
+      - "traefik.http.services.pihole.loadbalancer.server.port=8860"
 
 networks:
   proxy:
