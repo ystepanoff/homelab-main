@@ -280,6 +280,23 @@ services:
       - "traefik.http.routers.pihole.tls.certresolver=letsencrypt"
       - "traefik.http.services.pihole.loadbalancer.server.port=8860"
 
+  glance:
+    image: glanceapp/glance:latest
+    container_name: glance
+    networks: [ proxy ]
+    restart: unless-stopped
+    volumes:
+      - ./glance/config:/app/config:ro
+      - ./glance/assets:/app/assets
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.glance.rule=Host(`glance.${DOMAIN}`)"
+      - "traefik.http.routers.glance.entrypoints=websecure"
+      - "traefik.http.routers.glance.tls.certresolver=letsencrypt"
+      - "traefik.http.services.glance.loadbalancer.server.port=8080"
+      - "com.centurylinklabs.watchtower.enable=true"
+
 networks:
   proxy:
     driver: bridge
