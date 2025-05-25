@@ -297,6 +297,34 @@ services:
       - "traefik.http.services.glance.loadbalancer.server.port=8080"
       - "com.centurylinklabs.watchtower.enable=true"
 
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    networks: [ proxy ]
+    restart: unless-stopped
+    volumes:
+      - ./uptime-kuma:/app/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.uptime-kuma.rule=Host(`uptime.${DOMAIN}`)"
+      - "traefik.http.routers.uptime-kuma.entrypoints=websecure"
+      - "traefik.http.routers.uptime-kuma.tls.certresolver=letsencrypt"
+      - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3001"
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  signal-cli-rest-api:
+    container_name: signal-cli-rest-api
+    image: bbernhard/signal-cli-rest-api:latest
+    networks: [ proxy ]
+    restart: always
+    environment:
+      MODE: normal
+    ports:
+      - "888:8080"
+    volumes:
+      - "./signal-cli-rest-api:/home/.local/share/signal-cli"
+
 networks:
   proxy:
     driver: bridge

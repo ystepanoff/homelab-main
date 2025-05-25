@@ -9,4 +9,6 @@ watchyourlan/
 duplicati/
 pihole/
 glance/
+signal-cli-rest-api/
+uptime-kuma/
 .env

@@ -2,15 +2,20 @@ Homelab Stack
 
 Docker-Compose collection that runs a small self-hosted stack over Tailscale with TLS termination handled by Traefik.
 
-| Service           | Purpose                                                  | URL (default)             |
-|-------------------|----------------------------------------------------------|---------------------------|
-| Tailscale         | Tailnet connectivity                                     | —                         |
-| Traefik           | Reverse-proxy & ACME (dns-01 via Cloudflare)             | https://traefik.{DOMAIN}  |
-| PostgreSQL 16     | Shared database                                          | —                         |
-| Speedtest-Tracker | Scheduled bandwidth tests                                | https://speed.{DOMAIN}    |
-| Gitea             | Lightweight Git server                                   | https://git.{DOMAIN}      |
-| Actual-Budget     | Personal finance app                                     | https://actual.{DOMAIN}   |
-| Watchtower        | Automatic image updates                                  | —                         |
+| Service           | Purpose                             | URL (default)              |
+|-------------------|-------------------------------------|----------------------------|
+| Tailscale         | Tailnet connectivity                | —                          |
+| Traefik           | Reverse-proxy & ACME (dns-01 via Cloudflare) | https://traefik.${DOMAIN} |
+| Portainer         | Docker management UI                | https://portainer.${DOMAIN} |
+| PostgreSQL 16     | Shared database                     | —                          |
+| Speedtest-Tracker | Scheduled bandwidth tests           | https://speed.${DOMAIN}    |
+| Gitea             | Lightweight Git server              | https://git.${DOMAIN}      |
+| Actual-Budget     | Personal finance app                | https://actual.${DOMAIN}   |
+| Duplicati         | Encrypted backups to OneDrive       | https://bkp.${DOMAIN}      |
+| Pi-hole           | Network-wide ad-blocking DNS        | https://pihole.${DOMAIN}   |
+| Glance            | Self-hosted dashboard               | https://glance.${DOMAIN}   |
+| Uptime-Kuma       | Service uptime monitoring           | https://uptime.${DOMAIN}   |
+| Watchtower        | Automatic image updates             | —                          |
 
 ⸻
 
