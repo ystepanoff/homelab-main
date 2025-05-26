@@ -11,4 +11,5 @@ pihole/
 glance/
 signal-cli-rest-api/
 uptime-kuma/
+thelounge/
 .env
