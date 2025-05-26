@@ -325,6 +325,22 @@ services:
     volumes:
       - "./signal-cli-rest-api:/home/.local/share/signal-cli"
 
+  thelounge:
+    image: ghcr.io/thelounge/thelounge:latest
+    container_name: thelounge
+    networks: [ proxy ]
+    restart: always
+    volumes:
+      - ./thelounge:/var/opt/thelounge
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.thelounge.rule=Host(`irc.${DOMAIN}`)"
+      - "traefik.http.routers.thelounge.entrypoints=websecure"
+      - "traefik.http.routers.thelounge.tls.certresolver=letsencrypt"
+      - "traefik.http.services.thelounge.loadbalancer.server.port=9000"
+      - "com.centurylinklabs.watchtower.enable=true"
+
 networks:
   proxy:
     driver: bridge
