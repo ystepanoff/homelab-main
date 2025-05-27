@@ -161,7 +161,6 @@ services:
       - "traefik.http.routers.watchyourlan.tls.certresolver=letsencrypt"
       - "traefik.http.routers.watchyourlan.service=watchyourlan-proxy@docker"
       - "traefik.http.services.watchyourlan-proxy.loadbalancer.server.port=8841"
-      - "com.centurylinklabs.watchtower.enable=true"
 
   gitea:
     image: gitea/gitea:latest
@@ -300,18 +299,31 @@ services:
   uptime-kuma:
     image: louislam/uptime-kuma:latest
     container_name: uptime-kuma
-    networks: [ proxy ]
+    network_mode: host
     restart: unless-stopped
     volumes:
       - ./uptime-kuma:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  uptime-kuma-proxy:
+    image: alpine/socat:latest
+    container_name: uptime-kuma-proxy
+    command:
+      - TCP-LISTEN:8870,fork,reuseaddr
+      - TCP:host-gateway:3001
+    networks: [ proxy ]
+    extra_hosts:
+      - "host-gateway:host-gateway"
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
       - "traefik.http.routers.uptime-kuma.rule=Host(`uptime.${DOMAIN}`)"
       - "traefik.http.routers.uptime-kuma.entrypoints=websecure"
       - "traefik.http.routers.uptime-kuma.tls.certresolver=letsencrypt"
-      - "traefik.http.services.uptime-kuma.loadbalancer.server.port=3001"
-      - "com.centurylinklabs.watchtower.enable=true"
+      - "traefik.http.services.uptime-kuma.loadbalancer.server.port=8870"
 
   signal-cli-rest-api:
     container_name: signal-cli-rest-api
