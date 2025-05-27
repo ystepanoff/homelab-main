@@ -33,29 +33,35 @@ services:
     depends_on:
       - tailscale
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run:/var/run:ro
       - ./traefik/certs:/certs
-    command:
-      - --providers.docker=true
-      - --providers.docker.exposedByDefault=false
-      - --providers.docker.endpoint=unix:///var/run/docker.sock
-      - --api.dashboard=true
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge=true
-      - --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare
-      - --certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}
-      - --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json
-
-      - --entrypoints.web.address=:80
-      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-      - --entrypoints.websecure.address=:443
-
-      - --entrypoints.websecure.http.tls=true
-      - --entrypoints.websecure.http.tls.certResolver=letsencrypt
-      - --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN}
-      - --entrypoints.websecure.http.tls.domains[0].sans=${SANS_DOMAIN}
-
-      - --log.level=DEBUG
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo "⏳ Waiting for Docker socket…"
+        until [ -S /var/run/docker.sock ]; do
+          sleep 1
+        done
+        echo "✅ Docker socket is up, starting Traefik"
+        exec traefik \
+          --providers.docker=true \
+          --providers.docker.exposedByDefault=false \
+          --providers.docker.endpoint=unix:///var/run/docker.sock \
+          --api.dashboard=true \
+          --certificatesresolvers.letsencrypt.acme.dnschallenge=true \
+          --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare \
+          --certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL} \
+          --certificatesresolvers.letsencrypt.acme.storage=/certs/acme.json \
+          --entrypoints.web.address=:80 \
+          --entrypoints.web.http.redirections.entrypoint.to=websecure \
+          --entrypoints.web.http.redirections.entrypoint.scheme=https \
+          --entrypoints.websecure.address=:443 \
+          --entrypoints.websecure.http.tls=true \
+          --entrypoints.websecure.http.tls.certResolver=letsencrypt \
+          --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN} \
+          --entrypoints.websecure.http.tls.domains[0].sans=${SANS_DOMAIN} \
+          --log.level=DEBUG
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)'
