@@ -353,6 +353,61 @@ services:
       - "traefik.http.services.thelounge.loadbalancer.server.port=9000"
       - "com.centurylinklabs.watchtower.enable=true"
 
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    pid: host
+    network_mode: host
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ./netdata/config:/etc/netdata
+      - ./netdata/lib:/var/lib/netdata
+      - ./netdata/cache:/var/cache/netdata
+      - /:/host/root:ro,rslave
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/log:/host/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /run/dbus:/run/dbus:ro
+
+  netdata-proxy:
+    image: alpine/socat:latest
+    container_name: netdata-proxy
+    command:
+      - TCP-LISTEN:8890,fork,reuseaddr
+      - TCP:host-gateway:19999
+    networks: [ proxy ]
+    extra_hosts:
+      - "host-gateway:host-gateway"
+    restart: unless-stopped
+    environment:
+      NETDATA_DISABLE_CLOUD: 1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.netdata.rule=Host(`netdata.${DOMAIN}`)"
+      - "traefik.http.routers.netdata.entrypoints=websecure"
+      - "traefik.http.routers.netdata.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.netdata-root.rule=Host(`netdata.${DOMAIN}`) && Path(`/`)"
+      - "traefik.http.routers.netdata-root.entrypoints=websecure"
+      - "traefik.http.routers.netdata-root.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.netdata-root.middlewares=netdata-redirect"
+      - "traefik.http.routers.netdata-root.priority=100"
+      - "traefik.http.routers.netdata-root.service=noop@internal"
+      - "traefik.http.middlewares.netdata-redirect.redirectregex.regex=.*"
+      - "traefik.http.middlewares.netdata-redirect.redirectregex.replacement=/v3"
+      - "traefik.http.services.netdata.loadbalancer.server.port=8890"
+      - "com.centurylinklabs.watchtower.enable=true"
+
 networks:
   proxy:
     driver: bridge
