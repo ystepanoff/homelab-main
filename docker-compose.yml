@@ -408,6 +408,16 @@ services:
       - "traefik.http.services.netdata.loadbalancer.server.port=8890"
       - "com.centurylinklabs.watchtower.enable=true"
 
+  docker-cleanup:
+    image: alpine:latest
+    container_name: docker-cleanup
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: /bin/sh -c "echo '0 * * * * root docker system prune -af' > /etc/crontabs/root && crond -f -d 8"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
 networks:
   proxy:
     driver: bridge
