@@ -48,6 +48,10 @@ services:
           --providers.docker=true \
           --providers.docker.exposedByDefault=false \
           --providers.docker.endpoint=unix:///var/run/docker.sock \
+          --providers.swarm=true \
+          --providers.swarm.exposedByDefault=false \
+          --providers.swarm.endpoint=unix:///var/run/docker-swarm.sock \
+          --providers.swarm.network=proxy \
           --api.dashboard=true \
           --certificatesresolvers.letsencrypt.acme.dnschallenge=true \
           --certificatesresolvers.letsencrypt.acme.dnschallenge.provider=cloudflare \
@@ -77,9 +81,11 @@ services:
     restart: unless-stopped
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/run/docker-swarm.sock:/var/run/docker-swarm.sock:ro
       - ./portainer:/data
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
       - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)"
       - "traefik.http.routers.portainer.entrypoints=websecure"
       - "traefik.http.routers.portainer.tls.certresolver=letsencrypt"
