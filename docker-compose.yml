@@ -250,7 +250,7 @@ services:
     volumes:
       - ./duplicati/config:/config
       - ./duplicati/backups:/backups
-      - ~/homelab:/source
+      - ~/:/source
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -420,6 +420,23 @@ services:
       - "traefik.http.middlewares.netdata-redirect.redirectregex.replacement=/v3"
       - "traefik.http.services.netdata.loadbalancer.server.port=8890"
       - "com.centurylinklabs.watchtower.enable=true"
+
+  stuff-proxy:
+    image: alpine/socat
+    command:
+      - TCP-LISTEN:777,fork,reuseaddr
+      - TCP:host-gateway:777
+    networks: [ proxy ]
+    extra_hosts:
+      - "host-gateway:host-gateway"
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=proxy
+      - traefik.http.routers.stuff.rule=Host(`stuff.${DOMAIN}`)
+      - traefik.http.routers.stuff.entrypoints=websecure
+      - traefik.http.routers.stuff.tls.certresolver=letsencrypt
+      - traefik.http.services.stuff.loadbalancer.server.port=777
 
 networks:
   proxy:
