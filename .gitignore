@@ -13,4 +13,6 @@ signal-cli-rest-api/
 uptime-kuma/
 thelounge/
 netdata/
+unbound/
+etc-pihole/
 .env
