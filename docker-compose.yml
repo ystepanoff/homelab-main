@@ -65,7 +65,13 @@ services:
           --entrypoints.websecure.http.tls.certResolver=letsencrypt \
           --entrypoints.websecure.http.tls.domains[0].main=${DOMAIN} \
           --entrypoints.websecure.http.tls.domains[0].sans=${SANS_DOMAIN} \
-          --log.level=DEBUG
+          --log.level=DEBUG \
+          --metrics.prometheus=true \
+          --metrics.prometheus.buckets=0.1,0.3,1.2,5.0 \
+          --metrics.prometheus.addEntryPointsLabels=true \
+          --metrics.prometheus.addServicesLabels=true \
+          --entrypoints.metrics.address=:8899 \
+          --metrics.prometheus.entrypoint=metrics
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)'
@@ -458,6 +464,24 @@ services:
       - traefik.http.routers.stuff.entrypoints=websecure
       - traefik.http.routers.stuff.tls.certresolver=letsencrypt
       - traefik.http.services.stuff.loadbalancer.server.port=777
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/data:/prometheus:rw
+    networks:
+      - proxy
+    user: "1000:1000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN}`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls.certresolver=letsencrypt"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "com.centurylinklabs.watchtower.enable=true"
 
 networks:
   proxy:
