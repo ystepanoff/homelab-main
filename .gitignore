@@ -15,4 +15,6 @@ thelounge/
 netdata/
 unbound/
 etc-pihole/
+grafana/
+prometheus/
 .env
