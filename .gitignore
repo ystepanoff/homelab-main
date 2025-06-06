@@ -17,4 +17,6 @@ unbound/
 etc-pihole/
 grafana/
 prometheus/
+query-exporter/
+speedtest-metrics/
 .env
