@@ -309,7 +309,6 @@ services:
     ports:
       - "53:53/udp"
       - "53:53/tcp"
-      - "80:80"
     environment:
       TZ: ${TZ}
       FTLCONF_dns_upstreams: "unbound#53"
@@ -318,17 +317,6 @@ services:
     volumes:
       - ./pihole/pihole:/etc/pihole
       - ./pihole/dnsmasq.d:/etc/dnsmasq.d
-    restart: unless-stopped
-
-  pihole-proxy:
-    image: alpine/socat:latest
-    container_name: pihole-proxy
-    command:
-      - TCP-LISTEN:8860,fork,reuseaddr
-      - TCP:host-gateway:80
-    networks: [ proxy ]
-    extra_hosts:
-      - "host-gateway:host-gateway"
     restart: unless-stopped
     labels:
       - "traefik.enable=true"

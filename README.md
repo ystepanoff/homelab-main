@@ -16,6 +16,11 @@ Docker-Compose collection that runs a small self-hosted stack over Tailscale wit
 | Glance            | Self-hosted dashboard               | https://glance.${DOMAIN}   |
 | Uptime-Kuma       | Service uptime monitoring           | https://uptime.${DOMAIN}   |
 | Watchtower        | Automatic image updates             | —                          |
+| The Lounge         | Web IRC client                      | https://irc.${DOMAIN}     |
+| Netdata            | System metrics & monitoring         | https://netdata.${DOMAIN} |
+| Unbound            | Recursive DNS resolver              | https://unbound.${DOMAIN} |
+| Grafana            | Metrics visualization               | https://grafana.${DOMAIN} |
+| Prometheus         | Metrics collection                  | https://prom.${DOMAIN}    |
 
 ⸻
 
