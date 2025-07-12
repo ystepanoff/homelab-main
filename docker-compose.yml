@@ -90,6 +90,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /var/run/docker-swarm.sock:/var/run/docker-swarm.sock:ro
       - ./portainer:/data
+    ports:
+      - 8001:9000
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -132,6 +134,8 @@ services:
       SPEEDTEST_SCHEDULE: ${SPEEDTEST_SCHEDULE}
     volumes:
       - ./speedtest-tracker:/config
+    ports:
+      - 8002:80
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -189,6 +193,8 @@ services:
       - "host-gateway:host-gateway"
     depends_on: [ watchyourlan ]
     restart: unless-stopped
+    ports:
+      - 8003:8841
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -215,6 +221,8 @@ services:
       GITEA__database__PASSWD: ${POSTGRES_PASSWORD}
     volumes:
       - ./gitea:/data
+    ports:
+      - 8004:3000
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -231,6 +239,8 @@ services:
     restart: unless-stopped
     volumes:
       - ./actual:/data
+    ports:
+      - 8005:5006
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -274,6 +284,8 @@ services:
       - ./duplicati/config:/config
       - ./duplicati/backups:/backups
       - ~/:/source
+    ports:
+      - 8006:8200
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -309,6 +321,7 @@ services:
     ports:
       - "53:53/udp"
       - "53:53/tcp"
+      - "8007:80"
     environment:
       TZ: ${TZ}
       FTLCONF_dns_upstreams: "unbound#53"
@@ -318,6 +331,7 @@ services:
       - ./pihole/pihole:/etc/pihole
       - ./pihole/dnsmasq.d:/etc/dnsmasq.d
     restart: unless-stopped
+
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -368,6 +382,8 @@ services:
     volumes:
       - ./glance/config:/app/config:ro
       - ./glance/assets:/app/assets
+    ports:
+      - 8008:8080
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -385,6 +401,8 @@ services:
     volumes:
       - ./uptime-kuma:/app/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - 8009:3001
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.uptime-kuma.rule=Host(`uptime.${DOMAIN}`)"
@@ -413,6 +431,8 @@ services:
     restart: always
     volumes:
       - ./thelounge:/var/opt/thelounge
+    ports:
+      - 8010:9000
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -460,6 +480,8 @@ services:
     restart: unless-stopped
     environment:
       NETDATA_DISABLE_CLOUD: 1
+    ports:
+      - 8011:8890
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -504,6 +526,8 @@ services:
     networks:
       - proxy
     user: "1000:1000"
+    ports:
+      - 8012:9090
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN}`)"
@@ -525,6 +549,8 @@ services:
       - ./grafana:/var/lib/grafana:rw
     networks:
       - proxy
+    ports:
+      - 8013:3000
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN}`)"
