@@ -559,6 +559,14 @@ services:
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       - "com.centurylinklabs.watchtower.enable=true"
 
+  tor-privoxy:
+    restart: always
+    image: dockage/tor-privoxy:latest
+    ports:
+      - "9050:9050" # Tor proxy
+      - "9051:9051" # Tor control port
+      - "8118:8118" # Privoxy
+
 networks:
   proxy:
     driver: bridge
