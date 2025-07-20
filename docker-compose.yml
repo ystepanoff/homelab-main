@@ -81,26 +81,6 @@ services:
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.services.traefik.loadbalancer.server.port=8080"
 
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    networks: [ proxy ]
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/run/docker-swarm.sock:/var/run/docker-swarm.sock:ro
-      - ./portainer:/data
-    ports:
-      - 8001:9000
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)"
-      - "traefik.http.routers.portainer.entrypoints=websecure"
-      - "traefik.http.routers.portainer.tls.certresolver=letsencrypt"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
-      - "com.centurylinklabs.watchtower.enable=true"
-
   postgres:
     image: postgres:16
     container_name: postgres
@@ -135,7 +115,7 @@ services:
     volumes:
       - ./speedtest-tracker:/config
     ports:
-      - 8002:80
+      - "192.168.50.50:8002:80"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -194,7 +174,7 @@ services:
     depends_on: [ watchyourlan ]
     restart: unless-stopped
     ports:
-      - 8003:8841
+      - "192.168.50.50:8003:8841"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -222,7 +202,7 @@ services:
     volumes:
       - ./gitea:/data
     ports:
-      - 8004:3000
+      - "192.168.50.50:8004:3000"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -240,7 +220,7 @@ services:
     volumes:
       - ./actual:/data
     ports:
-      - 8005:5006
+      - "192.168.50.50:8005:5006"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -285,7 +265,7 @@ services:
       - ./duplicati/backups:/backups
       - ~/:/source
     ports:
-      - 8006:8200
+      - "192.168.50.50:8006:8200"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -302,14 +282,15 @@ services:
     ports:
       - "5335:53/tcp"
       - "5335:53/udp"
+    networks:
+      dns:
+        ipv4_address: 172.33.0.20
     volumes:
       - ./unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro
       - ./unbound/a-records.conf:/opt/unbound/etc/unbound/a-records.conf:ro
       - ./unbound/forward-records.conf:/opt/unbound/etc/unbound/forward-records.conf:ro
     networks: [ dns ]
     restart: unless-stopped
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
 
   pihole:
     image: pihole/pihole:latest
@@ -317,14 +298,17 @@ services:
     hostname: pihole
     depends_on:
       - unbound
-    networks: [ dns, proxy ]
+    networks:
+      dns:
+        ipv4_address: 172.33.0.30
+      proxy:
     ports:
       - "53:53/udp"
       - "53:53/tcp"
-      - "8007:80"
+      - "192.168.50.50:8007:80"
     environment:
       TZ: ${TZ}
-      FTLCONF_dns_upstreams: "unbound#53"
+      FTLCONF_dns_upstreams: "172.33.0.20#53"
       FTLCONF_dns_listeningMode: "all"
       WEBPASSWORD: "${PIHOLE_WEBPASSWORD}"
     volumes:
@@ -383,7 +367,7 @@ services:
       - ./glance/config:/app/config:ro
       - ./glance/assets:/app/assets
     ports:
-      - 8008:8080
+      - "192.168.50.50:8008:8080"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -402,7 +386,7 @@ services:
       - ./uptime-kuma:/app/data
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
-      - 8009:3001
+      - "192.168.50.50:8009:3001"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.uptime-kuma.rule=Host(`uptime.${DOMAIN}`)"
@@ -432,7 +416,7 @@ services:
     volumes:
       - ./thelounge:/var/opt/thelounge
     ports:
-      - 8010:9000
+      - "192.168.50.50:8010:9000"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -481,7 +465,7 @@ services:
     environment:
       NETDATA_DISABLE_CLOUD: 1
     ports:
-      - 8011:8890
+      - "192.168.50.50:8011:8890"
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=proxy"
@@ -527,7 +511,7 @@ services:
       - proxy
     user: "1000:1000"
     ports:
-      - 8012:9090
+      - "192.168.50.50:8012:9090"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.prometheus.rule=Host(`prometheus.${DOMAIN}`)"
@@ -550,7 +534,7 @@ services:
     networks:
       - proxy
     ports:
-      - 8013:3000
+      - "192.168.50.50:8013:3000"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN}`)"
@@ -566,9 +550,16 @@ services:
       - "9050:9050" # Tor proxy
       - "9051:9051" # Tor control port
       - "8118:8118" # Privoxy
+    networks:
+      - proxy
 
 networks:
   proxy:
     driver: bridge
     external: true
   dns:
+    name: dns
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.33.0.0/24
