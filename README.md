@@ -6,7 +6,6 @@ Docker-Compose collection that runs a small self-hosted stack over Tailscale wit
 |-------------------|-------------------------------------|----------------------------|
 | Tailscale         | Tailnet connectivity                | —                          |
 | Traefik           | Reverse-proxy & ACME (dns-01 via Cloudflare) | https://traefik.${DOMAIN} |
-| Portainer         | Docker management UI                | https://portainer.${DOMAIN} |
 | PostgreSQL 16     | Shared database                     | —                          |
 | Speedtest-Tracker | Scheduled bandwidth tests           | https://speed.${DOMAIN}    |
 | Gitea             | Lightweight Git server              | https://git.${DOMAIN}      |

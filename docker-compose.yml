@@ -289,7 +289,6 @@ services:
       - ./unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro
       - ./unbound/a-records.conf:/opt/unbound/etc/unbound/a-records.conf:ro
       - ./unbound/forward-records.conf:/opt/unbound/etc/unbound/forward-records.conf:ro
-    networks: [ dns ]
     restart: unless-stopped
 
   pihole:
