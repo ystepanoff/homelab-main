@@ -212,41 +212,6 @@ services:
       - "traefik.http.services.git.loadbalancer.server.port=3000"
       - "com.centurylinklabs.watchtower.enable=true"
 
-  actual-budget:
-    image: actualbudget/actual-server:latest
-    container_name: actual
-    networks: [ proxy ]
-    restart: unless-stopped
-    volumes:
-      - ./actual:/data
-    ports:
-      - "192.168.50.50:8005:5006"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.actual.rule=Host(`actual.${DOMAIN}`)"
-      - "traefik.http.routers.actual.entrypoints=websecure"
-      - "traefik.http.routers.actual.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.actual-iso.headers.customResponseHeaders.Cross-Origin-Opener-Policy=same-origin"
-      - "traefik.http.middlewares.actual-iso.headers.customResponseHeaders.Cross-Origin-Embedder-Policy=require-corp"
-      - "traefik.http.routers.actual.middlewares=actual-iso@docker"
-      - "traefik.http.services.actual.loadbalancer.server.port=5006"
-      - "com.centurylinklabs.watchtower.enable=true"
-
-  watchtower:
-    image: containrrr/watchtower:latest
-    container_name: watchtower
-    networks: [ proxy ]
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - TZ=${TZ}
-      - WATCHTOWER_CLEANUP=true
-      - WATCHTOWER_LABEL_ENABLE=true
-      - WATCHTOWER_POLL_INTERVAL=86400
-      - WATCHTOWER_ROLLING_RESTART=true
-
   duplicati:
     image: lscr.io/linuxserver/duplicati:latest
     container_name: duplicati
@@ -357,25 +322,6 @@ services:
       RUN_GRAVITY: true
       CRON: "0 * * * *"
 
-  glance:
-    image: glanceapp/glance:latest
-    container_name: glance
-    networks: [ proxy ]
-    restart: unless-stopped
-    volumes:
-      - ./glance/config:/app/config:ro
-      - ./glance/assets:/app/assets
-    ports:
-      - "192.168.50.50:8008:8080"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.glance.rule=Host(`glance.${DOMAIN}`)"
-      - "traefik.http.routers.glance.entrypoints=websecure"
-      - "traefik.http.routers.glance.tls.certresolver=letsencrypt"
-      - "traefik.http.services.glance.loadbalancer.server.port=8080"
-      - "com.centurylinklabs.watchtower.enable=true"
-
   uptime-kuma:
     image: louislam/uptime-kuma:latest
     container_name: uptime-kuma
@@ -406,24 +352,6 @@ services:
       - "888:8080"
     volumes:
       - "./signal-cli-rest-api:/home/.local/share/signal-cli"
-
-  thelounge:
-    image: ghcr.io/thelounge/thelounge:latest
-    container_name: thelounge
-    networks: [ proxy ]
-    restart: always
-    volumes:
-      - ./thelounge:/var/opt/thelounge
-    ports:
-      - "192.168.50.50:8010:9000"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.thelounge.rule=Host(`irc.${DOMAIN}`)"
-      - "traefik.http.routers.thelounge.entrypoints=websecure"
-      - "traefik.http.routers.thelounge.tls.certresolver=letsencrypt"
-      - "traefik.http.services.thelounge.loadbalancer.server.port=9000"
-      - "com.centurylinklabs.watchtower.enable=true"
 
   netdata:
     image: netdata/netdata
@@ -499,6 +427,34 @@ services:
       - traefik.http.routers.stuff.tls.certresolver=letsencrypt
       - traefik.http.services.stuff.loadbalancer.server.port=777
 
+  tor-privoxy:
+    restart: always
+    image: dockage/tor-privoxy:latest
+    ports:
+      - "9050:9050"
+      - "9051:9051"
+      - "8118:8118"
+    networks:
+      - proxy
+
+  thelounge:
+    image: ghcr.io/thelounge/thelounge:latest
+    container_name: thelounge
+    networks: [ proxy ]
+    restart: always
+    volumes:
+      - ./thelounge:/var/opt/thelounge
+    ports:
+      - "192.168.50.50:8010:9000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.thelounge.rule=Host(`irc.${DOMAIN}`)"
+      - "traefik.http.routers.thelounge.entrypoints=websecure"
+      - "traefik.http.routers.thelounge.tls.certresolver=letsencrypt"
+      - "traefik.http.services.thelounge.loadbalancer.server.port=9000"
+      - "com.centurylinklabs.watchtower.enable=true"
+
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -542,15 +498,19 @@ services:
       - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       - "com.centurylinklabs.watchtower.enable=true"
 
-  tor-privoxy:
-    restart: always
-    image: dockage/tor-privoxy:latest
-    ports:
-      - "9050:9050" # Tor proxy
-      - "9051:9051" # Tor control port
-      - "8118:8118" # Privoxy
-    networks:
-      - proxy
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    networks: [ proxy ]
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=${TZ}
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_POLL_INTERVAL=86400
+      - WATCHTOWER_ROLLING_RESTART=true
 
 networks:
   proxy:
